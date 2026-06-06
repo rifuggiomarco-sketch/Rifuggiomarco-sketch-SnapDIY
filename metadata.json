@@ -1,0 +1,11 @@
+{
+  "name": "SnapDIY",
+  "description": "An AI-powered upcycling companion that recognizes materials and suggests creative DIY projects.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "AI Component Generation",
+    "Material Recognition"
+  ]
+}

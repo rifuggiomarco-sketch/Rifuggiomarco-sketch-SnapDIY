@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Libre Baskerville", serif;
+
+  --color-bg-warm: #F9F6ED;
+  --color-olive-dark: #5D6D3E;
+  --color-olive-light: #849363;
+  --color-sand: #EAEAD6;
+  --color-sand-dark: #DEDEC2;
+  --color-charcoal: #1A1C18;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-warm text-charcoal font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .pill-card {
+    @apply bg-white rounded-[32px] overflow-hidden shadow-sm;
+  }
+
+  .btn-primary {
+    @apply bg-olive-dark text-white rounded-full px-6 py-3 font-medium flex items-center justify-center gap-2 transition-all active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-sand text-charcoal rounded-full px-6 py-3 font-medium flex items-center justify-center gap-2 transition-all active:scale-95;
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center justify-center gap-1 text-charcoal/50 transition-colors;
+  }
+
+  .nav-item.active {
+    @apply text-olive-dark font-medium;
+  }
+
+  .tag {
+    @apply px-4 py-1.5 rounded-full text-sm bg-sand-dark/50 text-olive-dark font-medium;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

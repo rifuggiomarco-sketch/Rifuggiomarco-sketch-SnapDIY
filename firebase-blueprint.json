@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and usage statistics",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bio": { "type": "string" },
+        "isPro": { "type": "boolean" },
+        "isGreenMember": { "type": "boolean" },
+        "bioPoints": { "type": "number" },
+        "completedCount": { "type": "number" },
+        "recycledCount": { "type": "number" },
+        "userMode": { "type": "string", "enum": ["Maker", "Teacher"] },
+        "preferredMaterials": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["displayName", "email"]
+    },
+    "InventoryItem": {
+      "title": "Laboratorio Item",
+      "description": "A material item stored in the user's laboratory/inventory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "quantity": { "type": "number" },
+        "category": { "type": "string" },
+        "lastScanned": { "type": "string", "format": "date-time" },
+        "image": { "type": "string" }
+      },
+      "required": ["name", "quantity", "category", "lastScanned"]
+    },
+    "Project": {
+      "title": "DIY Project",
+      "description": "Information about a specific upcycling project",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "difficulty": { "type": "string", "enum": ["Facile", "Medio", "Difficile"] },
+        "time": { "type": "string" },
+        "materials": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "content": { "type": "string" }
+            }
+          }
+        },
+        "image": { "type": "string" },
+        "views": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "difficulty", "time", "materials", "steps", "image", "category"]
+    },
+    "SavedProject": {
+      "title": "Saved Project Link",
+      "description": "A link between a user and a project they have saved",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "projectTitle": { "type": "string" },
+        "projectImage": { "type": "string" },
+        "savedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["projectId", "savedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Public and private user profile data"
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Library of DIY projects"
+    },
+    "/users/{userId}/savedProjects/{projectId}": {
+      "schema": "SavedProject",
+      "description": "Projects saved by the user"
+    },
+    "/users/{userId}/inventory/{itemId}": {
+      "schema": "InventoryItem",
+      "description": "Digitized inventory of materials in the user's laboratory"
+    }
+  }
+}

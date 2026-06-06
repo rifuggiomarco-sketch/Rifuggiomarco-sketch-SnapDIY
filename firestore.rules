@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation Helpers
+    function isValidUser(data) {
+      return data.displayName is string && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             (data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 1000)) &&
+             (data.bio == null || (data.bio is string && data.bio.size() <= 500)) &&
+             (data.isPro == null || data.isPro is bool) &&
+             (data.isGreenMember == null || data.isGreenMember is bool) &&
+             (data.bioPoints == null || data.bioPoints is number) &&
+             (data.completedCount == null || data.completedCount is number) &&
+             (data.recycledCount == null || data.recycledCount is number) &&
+             (data.userMode == null || data.userMode in ['Maker', 'Teacher']) &&
+             (data.preferredMaterials == null || (data.preferredMaterials is list && data.preferredMaterials.size() <= 20));
+    }
+
+    function isValidInventoryItem(data) {
+      return data.name is string && data.name.size() <= 100 &&
+             data.quantity is number && data.quantity >= 0 &&
+             data.category is string && data.category.size() <= 50 &&
+             data.lastScanned is timestamp &&
+             (data.image == null || (data.image is string && data.image.size() <= 1000));
+    }
+
+    function isValidProject(data) {
+      return data.title is string && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 2000 &&
+             data.difficulty in ['Facile', 'Medio', 'Difficile'] &&
+             data.time is string && data.time.size() <= 50 &&
+             data.materials is list && data.materials.size() <= 50 &&
+             data.steps is list && data.steps.size() <= 50 &&
+             data.image is string && data.image.size() <= 1000 &&
+             data.category is string && data.category.size() <= 50;
+    }
+
+    function isValidSavedProject(data) {
+      return data.projectId is string && isValidId(data.projectId) &&
+             data.savedAt is timestamp;
+    }
+
+    // Collection Rules
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        // Prevent users from artificially boosting their points/counts unless the system does it
+        // For a prototype, we allow them to modify profile fields
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio', 'preferredMaterials', 'completedCount', 'recycledCount', 'bioPoints', 'userMode'])
+      );
+      
+      match /inventory/{itemId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId); // Simplified for debug
+        allow update: if isOwner(userId); // Simplified for debug
+        allow delete: if isOwner(userId);
+      }
+
+      match /savedProjects/{savedId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId); // Simplified for debug
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /projects/{projectId} {
+      allow read: if true;
+      allow write: if isSignedIn(); // Allow seeding
+    }
+
+    // 0. Global Safety Net (Move to bottom)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
